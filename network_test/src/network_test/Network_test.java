@@ -18,9 +18,12 @@ public class Network_test {
     public static void main(String[] args) throws Exception {
         // TODO code application logic here
         Comm comm = new Comm();
+        HtmlParse parser = new HtmlParse();
         String test;
-        test=comm.getHTML("http://leagueoflegends.wikia.com/wiki/League_of_Legends_Wiki");
-        System.out.println(test);
+        test=comm.getIndex();
+        //comm.indexFile();
+        parser.parseFree(test);
+        
     }
     
 
