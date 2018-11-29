@@ -73,4 +73,31 @@ public class Comm {
         
     }
     
+    public void patchFile(String patch)throws UnknownHostException, IOException{
+        Socket s = new Socket(InetAddress.getByName("leagueoflegends.wikia.com"), 80);
+        PrintWriter pw = new PrintWriter(s.getOutputStream());
+        pw.print("GET /wiki/V"+patch+" HTTP/1.1\r\n");
+        pw.print("Host: leagueoflegends.wikia.com\r\n");
+        pw.print("Connection: close\r\n\r\n");
+        pw.flush();
+        BufferedReader br = new BufferedReader(new InputStreamReader(s.getInputStream()));
+        StringBuilder htmlPage = new StringBuilder();
+        String t = null;
+        //String temp = "";
+        while((t = br.readLine()) != null){
+            //System.out.println(t);
+//            temp+=t;
+//            temp+="\n";
+            htmlPage.append(t).append("\n");
+        }
+        br.close();
+        
+        File html = new File("patchNotes.html");
+        FileWriter fW = new FileWriter(html);
+        fW.write(htmlPage.toString());
+        fW.flush();
+        fW.close();
+        
+    }
+    
 }
