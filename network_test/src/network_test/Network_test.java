@@ -43,7 +43,8 @@ public class Network_test {
             String temp = getIndex();
             parseFree(temp);
         }
-        if(commands.toString().contains("--patch")) patch(commands.toString());
+        if(commands.toString().contains("--patch (current)")) currentP();
+        else if(commands.toString().contains("--patch")) patch(commands.toString());
         //System.out.print(commands);
     }
     
@@ -57,12 +58,12 @@ public class Network_test {
                 + "Enter: --synopsis for a quick synopsis of the program \n"
                 + "       --help to bring up this help prompt \n"
                 + "       --free to list the current free champions \n"
-                + "       --patch(current) to return an html file with the current version of patch notes \n" 
-                + "       --patch(#) to return an html file with a specific game version's patch notes \n"
+                + "       --patch (current) to return an html file with the current version of patch notes \n" 
+                + "       --patch (#) to return an html file with a specific game version's patch notes \n"
                 + "       (Note: most patch note images and links are disabled) \n"
                 + "\n"
-                + "Ex Input: --patch(8.20) \n"
-                + "  Output: The patch notes are saved to /8.20patchNotes.html (Many images and links are disabled) \n"
+                + "Ex Input: --patch (8.20) \n"
+                + "  Output: The patch notes are saved to /8.20PatchNotes.html (Many images and links are disabled) \n"
                 + "Ex Input: --free \n"
                 + "  Output: Diana | Jinx | Kindred | Lee Sin | Leona | Lissandra | Malzahar | Poppy | Soraka | Swain | Tahm Kench | Veigar | Wukong | Zac | \n"
                 + "\n"
@@ -79,9 +80,35 @@ public class Network_test {
         //Do nothing
     }
     
+    public static void currentP() throws UnknownHostException, IOException{
+        //Create a socket for the connection
+        Socket s = new Socket(InetAddress.getByName("leagueoflegends.wikia.com"), 80);
+        PrintWriter pw = new PrintWriter(s.getOutputStream());
+        //Send out a request for the patch page
+        pw.print("GET /wiki/Patch HTTP/1.1\r\n");
+        pw.print("Host: leagueoflegends.wikia.com\r\n");
+        pw.print("Connection: close\r\n\r\n");
+        pw.flush();
+        //Create a string from the response
+        BufferedReader br = new BufferedReader(new InputStreamReader(s.getInputStream()));
+        StringBuilder htmlPage = new StringBuilder();
+        String t;
+        while((t = br.readLine()) != null){
+            htmlPage.append(t).append("\n");
+        }
+        br.close();
+        //Parse the patch number from the page string
+        String temp[] = htmlPage.toString().split("Current Patch: V",2);
+        String temp2 = temp[1];
+        temp = temp2.split("</a>",2);
+        temp2 = temp[0];
+        //System.out.println(temp2);
+        patchFile(temp2);
+    }
+    
     public static void patch(String commands) throws IOException{
         //Parse out the patch number if available
-        String[] temp = commands.split("--patch",2);
+        String[] temp = commands.split("--patch ",2);
         commands = temp[1];
         temp = commands.split("\\)",2);
         commands = temp[0];
@@ -129,13 +156,13 @@ public class Network_test {
         }
         br.close();
         //Output the response string to an html file for viewing
-        File html = new File(patch+"patchNotes.html");
+        File html = new File(patch+"PatchNotes.html");
         FileWriter fW = new FileWriter(html);
         fW.write(htmlPage.toString());
         fW.flush();
         fW.close();
         //Alert the user
-        System.out.println("The patch notes are saved to /"+patch+"patchNotes.html (Many images and links are disabled)");
+        System.out.println("The patch notes are saved to /"+patch+"PatchNotes.html (Many images and links are disabled)");
     }
     
     public static void parseFree(String htmlPage){
